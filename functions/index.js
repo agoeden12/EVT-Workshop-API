@@ -1,23 +1,35 @@
 const express = require("express");
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const UserController = require('./controllers/userController');
+const UserController = require('./controllers/UsersController');
+const WorkshopController = require('./controllers/WorkshopController');
 
 admin.initializeApp();
-const app = express();
 
-
-const router = express.Router();
-
+// USER -----------------------------------------------------------------------
+const userApp = express();
+const userRouter = express.Router();
 const userController = new UserController(admin, functions);
-router.post("/createUser", userController.createUser);
-router.get("/getUsers", userController.getAllUsers);
-router.get("/getUser", userController.getUser);
-router.put("/updateUser", userController.updateUser);
-router.delete("/deleteUser", userController.deleteUser);
+userRouter.post("/createUser", userController.createUser);
+userRouter.get("/getUsers", userController.getAllUsers);
+userRouter.get("/getUser", userController.getUser);
+userRouter.put("/updateUser", userController.updateUser);
+userRouter.delete("/deleteUser", userController.deleteUser);
 
-app.use("/", router);
-exports.users = functions.https.onRequest(app);
+userApp.use("/", userRouter);
+exports.users = functions.https.onRequest(userApp);
+
+// WORKSHOP -------------------------------------------------------------------
+const workshopApp = express();
+const workshopRouter = express.Router();
+const workshopController = new WorkshopController(admin, functions);
+workshopRouter.get("/", workshopController.getShopCount);
+workshopRouter.post("/checkIn", workshopController.checkIn);
+// workshopRouter.post("/checkOut", workshopController.CheckOut);
+
+workshopApp.use("/", workshopRouter);
+exports.shop = functions.https.onRequest(workshopApp);
+
 
 // Create and Deploy Your First Cloud Functions
 // https://firebase.google.com/docs/functions/write-firebase-functions
