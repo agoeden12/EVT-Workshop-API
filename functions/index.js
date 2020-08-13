@@ -24,8 +24,9 @@ const workshopApp = express();
 const workshopRouter = express.Router();
 const workshopController = new WorkshopController(admin, functions);
 workshopRouter.get("/", workshopController.getShopCount);
+workshopRouter.get("/getMembers", workshopController.getMembersInShop);
 workshopRouter.post("/checkIn", workshopController.checkIn);
-// workshopRouter.post("/checkOut", workshopController.CheckOut);
+workshopRouter.post("/checkOut", workshopController.checkOut);
 
 workshopApp.use("/", workshopRouter);
 exports.shop = functions.https.onRequest(workshopApp);

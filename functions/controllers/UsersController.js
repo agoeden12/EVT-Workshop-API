@@ -39,7 +39,7 @@ class UserController {
       let data = doc.data();
       users.push({ id: id, data: data });
     });
-    res.json(users);
+    res.status(200).json(users);
   }
 
   async getUser(req, res) {
@@ -51,7 +51,7 @@ class UserController {
       .then((querySnapshot) => {
         querySnapshot.exists
           ? res
-              .status(201)
+              .status(200)
               .json({ id: querySnapshot.id, data: querySnapshot.data() })
           : res.status(500).send(JSON.stringify("Document Not Found"));
       });
