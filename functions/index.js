@@ -1,8 +1,9 @@
 const express = require("express");
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const UserController = require('./controllers/UsersController');
-const WorkshopController = require('./controllers/WorkshopController');
+const moment = require("moment")
+const UserController = require("./controllers/UsersController");
+const WorkshopController = require("./controllers/WorkshopController");
 
 admin.initializeApp();
 
@@ -30,7 +31,67 @@ workshopRouter.post("/checkOut", workshopController.checkOut);
 
 workshopApp.use("/", workshopRouter);
 exports.shop = functions.https.onRequest(workshopApp);
+exports.shopOnCheckIn = functions.firestore
+  .document("/shop/{documentId}")
+  .onCreate((snap, context) => {
+    const data = snap.data();
+    // functions.logger.log(
+    //   "Member entered shop",
+    //   context.params.documentId,
+    //   data
+    // );
 
+    const user = data;
+    const dateNow = new Date();
+    user.lastEnteredShop = dateNow;
+
+    // Call to discord bot?
+    return admin
+      .firestore()
+      .collection("users")
+      .doc(context.params.documentId)
+      .update(user)
+      .catch((err) => res.status(500).send(err));
+  });
+
+exports.shopOnCheckOut = functions.firestore
+  .document("/shop/{documentId}")
+  .onDelete(async (snap, context) => {
+    const data = snap.data();
+    // functions.logger.log(
+    //   "Member entered shop",
+    //   context.params.documentId,
+    //   data
+    // );
+    
+    const _MS_PER_DAY = 1000 * 60 * 60;
+
+    let user = data;
+
+
+
+    const lastEnteredShop = moment(user.lastEnteredShop);
+    const lastExitedShop = moment();
+
+    user.hours = Math.floor((lastExitedShop - lastEnteredShop) / _MS_PER_DAY) + user.hours;
+
+    functions.logger.log(
+      "Member exited shop",
+      "date difference: ",
+      Math.floor(lastExitedShop.diff(lastEnteredShop) / _MS_PER_DAY)
+    );
+    
+    return admin
+      .firestore()
+      .collection("users")
+      .doc(context.params.documentId)
+      .update(user);
+
+    // Call to discord bot?
+    // Wed Aug 19 2020 21:22:17 GMT-0400 (Eastern Daylight Time)
+
+  });
+  
 
 // Create and Deploy Your First Cloud Functions
 // https://firebase.google.com/docs/functions/write-firebase-functions
