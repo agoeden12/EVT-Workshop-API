@@ -1,3 +1,5 @@
+const moment = require("moment");
+
 class UserController {
   constructor(admin, functions) {
     this.admin = admin;
@@ -13,7 +15,7 @@ class UserController {
   async createUser(req, res) {
     const id = req.query.id;
     const data = req.body;
-    const dateNow = new Date();
+    const dateNow = moment();
 
     const user = {};
     user.name = data.name;

@@ -1,7 +1,7 @@
 const express = require("express");
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const moment = require("moment")
+const moment = require("moment");
 const UserController = require("./controllers/UsersController");
 const WorkshopController = require("./controllers/WorkshopController");
 
@@ -42,8 +42,7 @@ exports.shopOnCheckIn = functions.firestore
     // );
 
     const user = data;
-    const dateNow = new Date();
-    user.lastEnteredShop = dateNow;
+    user.lastEnteredShop = new moment();
 
     // Call to discord bot?
     return admin
