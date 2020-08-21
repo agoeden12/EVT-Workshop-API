@@ -1,3 +1,5 @@
+const moment = require("moment-timezone");
+
 class WorkshopController {
   constructor(admin, functions) {
     this.admin = admin;
@@ -46,6 +48,8 @@ class WorkshopController {
         user = querySnapshot.data();
       });
 
+    user.lastEnteredShop = moment().tz('America/New_York');
+    
     await this.admin
       .firestore()
       .collection("shop")

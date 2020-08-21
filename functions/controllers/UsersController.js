@@ -15,7 +15,7 @@ class UserController {
   async createUser(req, res) {
     const id = req.query.id;
     const data = req.body;
-    const dateNow = moment();
+    const dateNow = new moment().tz('America/New_York');
 
     const user = {};
     user.name = data.name;
