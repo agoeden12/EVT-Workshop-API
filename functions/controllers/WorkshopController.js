@@ -48,7 +48,7 @@ class WorkshopController {
         user = querySnapshot.data();
       });
 
-    user.lastEnteredShop = moment().tz('America/New_York');
+    user.lastEnteredShop = moment().tz('America/New_York').format();
     
     await this.admin
       .firestore()

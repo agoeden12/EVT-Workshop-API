@@ -21,8 +21,8 @@ class UserController {
     user.name = data.name;
     user.hours = 0;
     user.createdAt = dateNow;
-    user.lastEnteredShop = dateNow;
-    user.lastExitedShop = dateNow;
+    user.lastEnteredShop = dateNow.format();
+    user.lastExitedShop = dateNow.format();
 
     await this.admin
       .firestore()

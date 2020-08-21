@@ -60,22 +60,11 @@ exports.shopOnCheckOut = functions.firestore
     const data = snap.data();
 
     const lastExitedShop = new moment().tz('America/New_York');
-    const lastEnteredShop = data.lastEnteredShop;
-    var duration = moment.duration(lastExitedShop.diff(lastEnteredShop, "hours", true));
+    const lastEnteredShop = new moment(data.lastEnteredShop);
 
     let user = data;
-    user.lastExitedShop = lastExitedShop;
-    user.hours = duration.asSeconds();
-
-    functions.logger.log(
-      "Member exited shop",
-      `--lastExitedShop: ${lastExitedShop} | lastEnteredShop: ${data.lastEnteredShop}--`,
-      "hours difference:",
-      lastExitedShop.diff(lastEnteredShop, "seconds", true),
-      "hours difference:",
-      duration.asHours(),
-      {structuredData: true}
-    );
+    user.lastExitedShop = lastExitedShop.format();
+    user.hours = lastExitedShop.diff(lastEnteredShop, "hours", true) + data.hours;
 
     return admin
       .firestore()
