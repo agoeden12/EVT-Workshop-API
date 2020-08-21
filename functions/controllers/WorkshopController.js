@@ -31,7 +31,7 @@ class WorkshopController {
           users.push(doc.data());
         });
 
-        res.status(200).json(users);
+        return res.status(200).json(users);
       })
       .catch((err) => res.status(500).send(err));
   }
@@ -39,25 +39,23 @@ class WorkshopController {
   async checkIn(req, res) {
     const id = req.query.id;
     let user = {};
-    await this.admin
+    user = await this.admin
       .firestore()
       .collection("users")
       .doc(req.query.id)
       .get()
       .then((querySnapshot) => {
         user = querySnapshot.data();
+        user.lastEnteredShop = moment().tz('America/New_York').format();
+        return user;
       });
 
-    user.lastEnteredShop = moment().tz('America/New_York').format();
-    
     await this.admin
       .firestore()
       .collection("shop")
       .doc(id)
       .create(user)
-      .then((writeResult) => {
-        res.status(201).json(writeResult);
-      })
+      .then((writeResult) => res.status(201).json(writeResult))
       .catch((err) => res.status(500).send(err));
   }
 
@@ -69,9 +67,7 @@ class WorkshopController {
       .collection("shop")
       .doc(id)
       .delete()
-      .then((writeResult) => {
-        res.status(201).json(writeResult);
-      })
+      .then((writeResult) => res.status(201).json(writeResult))
       .catch((err) => res.status(500).send(err));
   }
 }

@@ -70,29 +70,24 @@ exports.shopOnCheckOut = functions.firestore
     user.lastExitedShop = lastExitedShop.format();
     user.hours = lastExitedShop.diff(lastEnteredShop, "hours", true) + data.hours;
 
-    return admin
+    await admin
       .firestore()
       .collection("users")
       .doc(context.params.documentId)
       .update(user)
-      .then(() => {
-        return user;
-      })
-      .then((user) => {
-        const log = {
-          status: "Exited Shop",
-          user: user,
-          time: new moment().tz('America/New_York')
-        }
+      .catch((err) => res.status(500).send(err));
 
-        // Call to discord bot?
-        admin
-          .firestore()
-          .collection("logs")
-          .doc()
-          .create(log)
-          .catch((err) => res.status(500).send(err));
-      })
+    const log = {
+      status: "Exited Shop",
+      user: user,
+      time: new moment().tz('America/New_York')
+    }
+
+    return admin
+      .firestore()
+      .collection("logs")
+      .doc()
+      .create(log)
       .catch((err) => res.status(500).send(err));
 
     // Call to discord bot?

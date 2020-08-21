@@ -30,22 +30,20 @@ class UserController {
       .doc(id)
       .set(user)
       .then((writeResult) => res.status(201).json(writeResult))
-      .then(() => {
-        const log = {
-          status: "Member Added",
-          user: user,
-          time: dateNow
-        }
+      .catch((err) => res.status(500).send(err));
 
-        // Call to discord bot?
-        this.admin
+      const log = {
+        status: "Member Added",
+        user: user,
+        time: dateNow
+      }
+      
+      return this.admin
           .firestore()
           .collection("logs")
           .doc()
           .create(log)
           .catch((err) => res.status(500).send(err));
-      })
-      .catch((err) => res.status(500).send(err));
   }
 
   async getAllUsers(req, res) {
@@ -66,7 +64,7 @@ class UserController {
       .doc(req.query.id)
       .get()
       .then((querySnapshot) => {
-        querySnapshot.exists
+        return querySnapshot.exists
           ? res
             .status(200)
             .json({ id: querySnapshot.id, data: querySnapshot.data() })
