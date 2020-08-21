@@ -33,26 +33,30 @@ workshopApp.use("/", workshopRouter);
 exports.shop = functions.https.onRequest(workshopApp);
 
 // -- USE FOR DISCORD NOTIF. --
-// exports.shopOnCheckIn = functions.firestore
-//   .document("/shop/{documentId}")
-//   .onCreate((snap, context) => {
-//     const data = snap.data();
-//     // functions.logger.log(
-//     //   "Member entered shop",
-//     //   context.params.documentId,
-//     //   data
-//     // );
+exports.shopOnCheckIn = functions.firestore
+  .document("/shop/{documentId}")
+  .onCreate((snap, context) => {
+    const data = snap.data();
+    // functions.logger.log(
+    //   "Member entered shop",
+    //   context.params.documentId,
+    //   data
+    // );
 
-//     const user = data;
+    const log = {
+      status: "Entered Shop",
+      user: data,
+      time: new moment().tz('America/New_York')
+    }
 
-//     // Call to discord bot?
-//     return admin
-//       .firestore()
-//       .collection("users")
-//       .doc(context.params.documentId)
-//       .update(user)
-//       .catch((err) => res.status(500).send(err));
-//   });
+    // Call to discord bot?
+    return admin
+      .firestore()
+      .collection("logs")
+      .doc()
+      .create(log)
+      .catch((err) => res.status(500).send(err));
+  });
 
 exports.shopOnCheckOut = functions.firestore
   .document("/shop/{documentId}")
@@ -71,6 +75,24 @@ exports.shopOnCheckOut = functions.firestore
       .collection("users")
       .doc(context.params.documentId)
       .update(user)
+      .then(() => {
+        return user;
+      })
+      .then((user) => {
+        const log = {
+          status: "Exited Shop",
+          user: user,
+          time: new moment().tz('America/New_York')
+        }
+
+        // Call to discord bot?
+        admin
+          .firestore()
+          .collection("logs")
+          .doc()
+          .create(log)
+          .catch((err) => res.status(500).send(err));
+      })
       .catch((err) => res.status(500).send(err));
 
     // Call to discord bot?

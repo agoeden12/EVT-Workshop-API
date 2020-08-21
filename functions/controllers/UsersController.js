@@ -30,6 +30,21 @@ class UserController {
       .doc(id)
       .set(user)
       .then((writeResult) => res.status(201).json(writeResult))
+      .then(() => {
+        const log = {
+          status: "Member Added",
+          user: user,
+          time: dateNow
+        }
+
+        // Call to discord bot?
+        this.admin
+          .firestore()
+          .collection("logs")
+          .doc()
+          .create(log)
+          .catch((err) => res.status(500).send(err));
+      })
       .catch((err) => res.status(500).send(err));
   }
 
@@ -53,8 +68,8 @@ class UserController {
       .then((querySnapshot) => {
         querySnapshot.exists
           ? res
-              .status(200)
-              .json({ id: querySnapshot.id, data: querySnapshot.data() })
+            .status(200)
+            .json({ id: querySnapshot.id, data: querySnapshot.data() })
           : res.status(500).send(JSON.stringify("Document Not Found"));
       });
   }
