@@ -8,6 +8,7 @@ class UserController {
     this.createUser = this.createUser.bind(this);
     this.getAllUsers = this.getAllUsers.bind(this);
     this.getUser = this.getUser.bind(this);
+    this.getUserByName = this.getUserByName.bind(this);
     this.updateUser = this.updateUser.bind(this);
     this.deleteUser = this.deleteUser.bind(this);
   }
@@ -15,7 +16,7 @@ class UserController {
   async createUser(req, res) {
     const id = req.query.id;
     const data = req.body;
-    const dateNow = new moment().tz('America/New_York');
+    const dateNow = new moment().tz("America/New_York");
 
     const user = {};
     user.name = data.name;
@@ -32,18 +33,18 @@ class UserController {
       .then((writeResult) => res.status(201).json(writeResult))
       .catch((err) => res.status(500).send(err));
 
-      const log = {
-        status: "Member Added",
-        user: user,
-        time: dateNow
-      }
-      
-      return this.admin
-          .firestore()
-          .collection("logs")
-          .doc()
-          .create(log)
-          .catch((err) => res.status(500).send(err));
+    const log = {
+      status: "Member Added",
+      user: user,
+      time: dateNow,
+    };
+
+    return this.admin
+      .firestore()
+      .collection("logs")
+      .doc()
+      .create(log)
+      .catch((err) => res.status(500).send(err));
   }
 
   async getAllUsers(req, res) {
@@ -66,9 +67,30 @@ class UserController {
       .then((querySnapshot) => {
         return querySnapshot.exists
           ? res
-            .status(200)
-            .json({ id: querySnapshot.id, data: querySnapshot.data() })
+              .status(200)
+              .json({ id: querySnapshot.id, data: querySnapshot.data() })
           : res.status(500).send(JSON.stringify("Document Not Found"));
+      });
+  }
+
+  async getUserByName(req, res) {
+    await this.admin
+      .firestore()
+      .collection("users")
+      .where("name", "==", req.query.name)
+      .get()
+      .then((querySnapshot) => {
+        if (querySnapshot.size > 0) {
+          let users = [];
+          querySnapshot.forEach((doc) => {
+            let id = doc.id;
+            let data = doc.data();
+            users.push({ id: id, data: data });
+          });
+          return res.status(200).json(users);
+        } else {
+          return res.status(500).send(JSON.stringify("Document Not Found"));
+        }
       });
   }
 
