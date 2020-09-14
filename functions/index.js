@@ -15,6 +15,7 @@ userRouter.post("/createUser", userController.createUser);
 userRouter.get("/getUsers", userController.getAllUsers);
 userRouter.get("/getUser", userController.getUser);
 userRouter.get("/getUserByName", userController.getUserByName);
+userRouter.get("/getUserByDiscordId", userController.getUserByDiscordId);
 userRouter.put("/updateUser", userController.updateUser);
 userRouter.delete("/deleteUser", userController.deleteUser);
 

@@ -9,6 +9,7 @@ class UserController {
     this.getAllUsers = this.getAllUsers.bind(this);
     this.getUser = this.getUser.bind(this);
     this.getUserByName = this.getUserByName.bind(this);
+    this.getUserByDiscordId = this.getUserByDiscordId.bind(this);
     this.updateUser = this.updateUser.bind(this);
     this.deleteUser = this.deleteUser.bind(this);
   }
@@ -20,6 +21,7 @@ class UserController {
 
     const user = {};
     user.name = data.name;
+    user.discord = data.discord;
     user.hours = 0;
     user.createdAt = dateNow;
     user.lastEnteredShop = dateNow.format();
@@ -81,13 +83,36 @@ class UserController {
       .get()
       .then((querySnapshot) => {
         if (querySnapshot.size > 0) {
-          let users = [];
+          let user = {};
           querySnapshot.forEach((doc) => {
             let id = doc.id;
             let data = doc.data();
-            users.push({ id: id, data: data });
+            user.id = id;
+            user.data = data;
           });
-          return res.status(200).json(users);
+          return res.status(200).json(user);
+        } else {
+          return res.status(500).send(JSON.stringify("Document Not Found"));
+        }
+      });
+  }
+
+  async getUserByDiscordId(req, res) {
+    await this.admin
+      .firestore()
+      .collection("users")
+      .where("discord", "==", req.query.id)
+      .get()
+      .then((querySnapshot) => {
+        if (querySnapshot.size > 0) {
+          let user = {};
+          querySnapshot.forEach((doc) => {
+            let id = doc.id;
+            let data = doc.data();
+            user.id = id;
+            user.data = data;
+          });
+          return res.status(200).json(user);
         } else {
           return res.status(500).send(JSON.stringify("Document Not Found"));
         }
